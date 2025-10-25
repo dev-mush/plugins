@@ -2,7 +2,7 @@
 // @flow
 //-----------------------------------------------------------------------------
 // Dashboard plugin helper functions for Perspectives
-// Last updated 2025-06-05 for v2.2.2
+// Last updated 2025-10-05 for v2.3.0
 //-----------------------------------------------------------------------------
 
 import pluginJson from '../plugin.json'
@@ -22,7 +22,7 @@ import { getFolderFromFilename, getFoldersMatching } from '@helpers/folders'
 import { displayTitle } from '@helpers/general'
 import { allNotesSortedByChanged, getNoteByFilename } from '@helpers/note'
 import { chooseNoteV2 } from '@helpers/NPnote'
-import { getSettings, saveSettings } from '@helpers/NPConfiguration'
+import { backupSettings, getSettings, saveSettings } from '@helpers/NPConfiguration'
 import { isHTMLWindowOpen } from '@helpers/NPWindows'
 import { chooseOption, getInputTrimmed, showMessage } from '@helpers/userInput'
 export type TPerspectiveOptionObject = { isModified?: boolean, label: string, value: string }
@@ -197,8 +197,9 @@ export async function getPerspectiveSettings(logAllKeys: boolean = false): Promi
       perspectiveSettings = parseSettings(perspectiveSettingsStr) ?? []
       // logPerspectives(perspectiveSettings, logAllKeys)
     } else {
-      // No settings found, so will need to set from the defaults instead
-      logWarn('getPerspectiveSettings', `No settings found: will load in the defaults:`)
+      // No perspective settings found, so will need to set from the defaults instead
+      logWarn('getPerspectiveSettings', `No perspective settings found, so will load in the defaults. But first, I will save a copy of the settings.json file for investigation.`)
+      await backupSettings('jgclark.Dashboard', 'after_no_perspective_settings_found')
       perspectiveSettings = await getPerspectiveSettingDefaults()
       const defaultPersp = getPerspectiveNamed('-', perspectiveSettings)
       if (!defaultPersp) {

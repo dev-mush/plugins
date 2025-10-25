@@ -1,7 +1,7 @@
 // @flow
 //-----------------------------------------------------------------------------
 // Dashboard plugin helper functions
-// Last updated 2025-08-27 for v2.3.0.b8, @jgclark
+// Last updated 2025-09-08 for v2.3.0.b10, @jgclark
 //-----------------------------------------------------------------------------
 
 import pluginJson from '../plugin.json'
@@ -288,6 +288,9 @@ export function makeDashboardParas(origParas: Array<TParagraph>): Array<TParagra
  * - ignoreItemsWithTerms  (from 2.1.0.b4 can be applied to calendar headings too)
  * - ignoreTasksScheduledToFuture
  * - excludeTasksWithTimeblocks & excludeChecklistsWithTimeblocks
+ * 
+ * TODO: finish? add support for Teamspace daily notes
+ * 
  * @param {TNote} timePeriodNote base calendar note to process
  * @param {string} calendarPeriodName
  * @param {TDashboardSettings} dashboardSettings
@@ -397,7 +400,6 @@ export function getOpenItemParasForTimePeriod(
     // -------------------------------------------------------------
     // Get list of open tasks/checklists scheduled/referenced to this period from other notes, and of the right paragraph type
     // A task in today dated for today doesn't show here b/c it's not in backlinks
-    // (In v1.x this was 2-3x quicker than part above)
     let refOpenParas: Array<TParagraph> = []
     for (const note of matchingNotes) {
       logDebug('getOpenItemPFCTP', `- getting referenced paras for ${note.filename}`)
@@ -418,7 +420,6 @@ export function getOpenItemParasForTimePeriod(
 
       // Get list of allowed folders (using both include and exlcude settings)
       const allowedFoldersInCurrentPerspective = getCurrentlyAllowedFolders(dashboardSettings)
-      // FIXME(EduardMe): I think this is where the .type is failing.
       // $FlowIgnore[incompatible-call] - p.note almost guaranteed to exist
       logDebug('getOpenItemPFCTP: refOpenParas', refOpenParas.map((p) => p.note?.filename ?? '<no note>'))
 
@@ -431,6 +432,8 @@ export function getOpenItemParasForTimePeriod(
 
       // Filter out anything from 'ignoreItemsWithTerms' setting
       refOpenParas = filterParasByIgnoreTerms(refOpenParas, dashboardSettings, startTime, 'getOpenItemPFCTP')
+
+      // TODO: now do any priority delta calculations if there is FM field 'note-priority-delta' set
     }
 
     // Decide whether to return two separate arrays, or one combined one
